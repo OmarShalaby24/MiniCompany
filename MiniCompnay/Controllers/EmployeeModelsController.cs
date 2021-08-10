@@ -42,16 +42,6 @@ namespace MiniCompnay.Controllers
                 return NotFound();
             }
 
-//            List<SkillModel> skills = new List<SkillModel>();
-//            skills = _context.EmployeeSkills
-//                .Join
-//                .Where(e => e.EmployeeID == id)
-//.Select(s => new SkillModel
-//{
-//    ID=s.SkillID
-//}).ToList();
-
-
             List<SkillModel> skills = _context.EmployeeSkills
                 .Where(e => e.EmployeeID == id)
                 .Join(
@@ -61,10 +51,10 @@ namespace MiniCompnay.Controllers
                     (es, s) => new SkillModel
                     {
                         ID = es.SkillID,
-                        Name = s.Name
+                        Name = s.Name,
                     }
                 ).ToList();
-            //ViewData["Skills"] = skills;
+            ViewBag.EmpID = id;
             ViewBag.TableHead = "Skills";
             ViewBag.SkillList = skills;
 
@@ -185,7 +175,9 @@ namespace MiniCompnay.Controllers
                 return NotFound();
             }
 
-            var sklList = new SelectList(_context.Skills.ToList(),"ID", "Name");
+
+            var sklList = new SelectList(_context.Skills
+                .ToList(), "ID", "Name");
             ViewData["Skills"] = sklList;
 
             ViewBag.Skl = _context.Skills.ToList();
@@ -216,16 +208,55 @@ namespace MiniCompnay.Controllers
 
             if (ModelState.IsValid)
             {
+
+
+                List<EmployeeSkillModel> newSkills = new List<EmployeeSkillModel>();
                 foreach (int newSkillID in SkillIDs)
                 {
+                    var tmp = _context.EmployeeSkills
+                        .Where(e=> e.EmployeeID == employeeSkillModel.EmployeeID && e.SkillID == newSkillID)
+                        .ToList();
+                    if (tmp.Count() == 1)
+                        continue;
                     employeeSkillModel.ID = 0;
                     employeeSkillModel.SkillID = newSkillID;
-                    _context.Add(employeeSkillModel);
-                    await _context.SaveChangesAsync();
+                    newSkills.Add(new EmployeeSkillModel { EmployeeID = employeeSkillModel.EmployeeID, SkillID = employeeSkillModel.SkillID });
                 }
+                _context.EmployeeSkills.AddRange(newSkills);
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(employeeSkillModel);
+        }
+
+        // GET: EmployeeModels/Delete/5
+        public async Task<IActionResult> RemoveSkill(int? eid, int? sid)
+        {
+            if(eid == null)
+            {
+                return NotFound();
+            }
+
+            EmployeeSkillModel employeeSkillModel = await _context.EmployeeSkills
+                .FirstOrDefaultAsync(es => es.EmployeeID == eid && es.SkillID == sid);
+            if (employeeSkillModel == null)
+            {
+                return NotFound();
+            }
+
+            return View(employeeSkillModel);
+
+        }
+
+        // POST: EmployeeModels/Delete/5
+        [HttpPost, ActionName("RemoveSkillConfirmed")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveSkillConfirmed(int eid, int sid)
+        {
+            EmployeeSkillModel employeeSkillModel = await _context.EmployeeSkills.FirstOrDefaultAsync(es => es.EmployeeID == eid && es.SkillID == sid);
+            _context.EmployeeSkills.Remove(employeeSkillModel);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
     }
 }

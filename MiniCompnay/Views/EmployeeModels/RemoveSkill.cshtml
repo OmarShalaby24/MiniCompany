@@ -1,0 +1,21 @@
+﻿@model MiniCompnay.Models.EmployeeSkillModel
+@{
+    ViewData["Title"] = "RemoveSkill";
+}
+
+<h1>RemoveSkill</h1>
+
+<h3>Are you sure you want to Remove this Skill?</h3>
+<div>
+    <h4>EmployeeModel</h4>
+    <hr />
+    
+
+    <form asp-action="RemoveSkillConfirmed">
+        <input type="hidden" value="@Model.EmployeeID" name="eid" />
+        <input type="hidden" value="@Model.SkillID" name="sid"/>
+
+        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        <a asp-action="Index">Back to List</a>
+    </form>
+</div>

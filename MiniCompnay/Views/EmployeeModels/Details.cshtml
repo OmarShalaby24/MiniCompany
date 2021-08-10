@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Details";
+
 }
 
 <h1>Details</h1>
@@ -35,6 +36,9 @@
                 <th>
                     @ViewBag.TableHead
                 </th>
+                <th>
+                    
+                </th>
             </tr>
         </thead>
         <tbody>
@@ -45,7 +49,15 @@
                     @item.Name
                     
                 </td>
-                
+                <td>
+                    <form asp-action="RemoveSkill">
+                        <input type="hidden" value="@Model.ID" name="eid" />
+                        <input type="hidden" value="@item.ID" name="sid" />
+                        <input type="submit" value="Remove" class="btn btn-danger"/>
+                    </form>
+                    
+
+                </td>
             </tr>
             }
 
