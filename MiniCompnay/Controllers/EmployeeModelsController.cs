@@ -175,12 +175,34 @@ namespace MiniCompnay.Controllers
                 return NotFound();
             }
 
+            List<SkillModel> selectedSkills = new List<SkillModel>();
+            selectedSkills = _context.EmployeeSkills
+            .Where(e => e.EmployeeID == id)
+            .Join(
+                _context.Skills,
+                es => es.SkillID,
+                s => s.ID,
+                (es, s) => new SkillModel
+                {
+                    ID = s.ID,
+                    Name = s.Name
+                }
+            )
+            .ToList();
+            ViewBag.SelectedSkills = selectedSkills;
 
-            var sklList = new SelectList(_context.Skills
-                .ToList(), "ID", "Name");
-            ViewData["Skills"] = sklList;
 
-            ViewBag.Skl = _context.Skills.ToList();
+            //MultiSelectList sklList = new MultiSelectList(_context.Skills.ToList(), "ID", "Name");
+            //ViewData["Skills"] = sklList;
+
+            List<SkillModel> allSkills = new List<SkillModel>();
+            allSkills = _context.Skills.ToList();
+            ViewBag.Skl = allSkills;
+
+            List<SkillModel> availableSkills = new List<SkillModel>();
+            allSkills.RemoveAll(x => selectedSkills.Any(y => y.ID == x.ID));
+            //availableSkills = allSkills.Except<SkillModel>(selectedSkills).ToList();
+            ViewBag.Available = allSkills;
 
             var employee = _context.Employees.Where(e => e.ID == id).ToList();
             ViewBag.Employee = employee;
@@ -200,24 +222,15 @@ namespace MiniCompnay.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddSkill([Bind("EmployeeID")] EmployeeSkillModel employeeSkillModel,int[] SkillIDs)
         {
-            
-            /*EmployeeModel emp = new EmployeeModel()
-            {
-                ID = employeeSkillModel.EmployeeID
-            };*/
-
             if (ModelState.IsValid)
             {
+                _context.EmployeeSkills
+                    .RemoveRange(_context.EmployeeSkills.Where(es => es.EmployeeID == employeeSkillModel.EmployeeID));
 
 
                 List<EmployeeSkillModel> newSkills = new List<EmployeeSkillModel>();
                 foreach (int newSkillID in SkillIDs)
                 {
-                    var tmp = _context.EmployeeSkills
-                        .Where(e=> e.EmployeeID == employeeSkillModel.EmployeeID && e.SkillID == newSkillID)
-                        .ToList();
-                    if (tmp.Count() == 1)
-                        continue;
                     employeeSkillModel.ID = 0;
                     employeeSkillModel.SkillID = newSkillID;
                     newSkills.Add(new EmployeeSkillModel { EmployeeID = employeeSkillModel.EmployeeID, SkillID = employeeSkillModel.SkillID });

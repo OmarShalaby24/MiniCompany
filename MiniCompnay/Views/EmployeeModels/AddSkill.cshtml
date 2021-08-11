@@ -32,18 +32,22 @@
             </dl>
             
             <div class="form-group">
-
-                @*@Html.ListBoxFor(s => s.SkillID, (IEnumerable<SelectListItem>)ViewData["Skills"], new { @class = "form-control" })*@
-                @Html.ListBox("SkillIDs", (MultiSelectList)ViewBag.Skills, new { @class="form-control" })
+                <select multiple="multiple"  name="SkillIDs" class="form-control">
+                    @foreach(SkillModel skill in ViewBag.SelectedSkills)
+                    {
+                        <option value="@skill.ID" selected="selected">@skill.Name</option>
+                    }
+                    @foreach (SkillModel skill in ViewBag.Available)
+                    {
+                        <option value="@skill.ID">@skill.Name</option>
+                    }
+                </select>
+                @*@Html.ListBox("SkillIDs", (MultiSelectList)ViewBag.Skills, new { @class="form-control" })*@
             </div>
 
             <div class="form-group">
                 <input type="submit" value="Add" class="btn btn-primary" />
             </div>
-
-
-                        
-
         </form>
     </div>
 </div>
